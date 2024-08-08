@@ -24,7 +24,7 @@ class OrderController extends Controller
 
         foreach ($tickets as $ticket) {
             $html .= '<p>Ticket ID: ' . $ticket->ticket_id . '</p>';
-            $html .= '<p>Description: ' . $ticket->ticket_email . '</p>';
+            $html .= '<p>Descridtion: ' . $ticket->ticket_email . '</p>';
             $html .= '<hr>'; // Séparateur entre les tickets
         }
 
@@ -98,6 +98,38 @@ class OrderController extends Controller
      */
     public function store(Request $request)
     {
+        $validator = Validator::make($request->all(), [
+            'order_number' => 'required|string|max:50|unique:orders,order_number',
+            'order_event_id' => 'required|integer',
+            'order_payment' => 'required|string|max:100',
+            'order_info' => 'nullable|string',
+        ], [
+            'order_number.required' => 'Le nombre de commande est obligatoire.',
+            'order_number.string' => 'Le nombre de commande doit être une chaîne de caractères.',
+            'order_number.max' => 'Le nombre de commande ne peut pas dépasser 50 caractères.',
+            'order_number.unique' => 'Ce nombre de commande est déjà utilisé.',
+            'order_event_id.required' => 'L\'identifiant d\'événement est obligatoire.',
+            'order_event_id.integer' => 'L\'identifiant d\'événement doit être un entier.',
+            'order_price.required' => 'Le prix est obligatoire.',
+            'order_price.string' => 'Le prix doit être une chaîne de caractères.',
+            'order_price.max' => 'Le prix ne peut pas dépasser 10 caractères.',
+            'order_type.required' => 'Le type de commande est obligatoire.',
+            'order_type.string' => 'Le type de commande doit être une chaîne de caractères.',
+            'order_type.max' => 'Le type de commande ne peut pas dépasser 50 caractères.',
+            'order_payment.required' => 'Le moyen de paiement est obligatoire.',
+            'order_payment.string' => 'Le moyen de paiement doit être une chaîne de caractères.',
+            'order_payment.max' => 'Le moyen de paiement ne peut pas dépasser 100 caractères.',
+            'order_info.string' => 'Les informations supplémentaires doivent être une chaîne de caractères.',
+            'order_created_on.date_format' => 'La date de création doit être au format YYYY-MM-DD HH:MM:SS.',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'message' => 'The given data was invalid.',
+                'errors' => $validator->errors()->all()
+            ], 422);
+        }
+
         // Créer une nouvelle instance de OrdersIntent avec les données validées
         $orderIntent = OrdersIntent::where('order_intent_id',$request->order_intent_id)->firstOrFail();
 
@@ -108,7 +140,9 @@ class OrderController extends Controller
             'order_type' => $orderIntent->order_intent_type,
             'order_payment' => $request->order_payment,
             'order_info' => $request->order_info,
-            'order_created_on' => Carbon::now()
+            'order_created_on' => Carbon::now(),
+
+            'user_id' => $request->user()->id,
         ]);
 
         $nombre = (int)$request->order_number;
@@ -150,7 +184,7 @@ class OrderController extends Controller
         return response()->json([
             'message' => 'Réservation confirmé avec succès.',
             'downloadUrl' => $url,
-            'data' => [
+            'result' => [
                 'Commande' => $order,
                 'tickets' => $tickets
             ],
@@ -159,9 +193,14 @@ class OrderController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show($orderId)
+    public function show($userId)
     {
-        //
+        $orders = Order::where('user_id', $userId)->paginate(4);
+
+        return response()->json([
+            'message' => 'Liste des commandes de l\'utilisateur',
+            'result' => $orders,
+        ], 200);
     }
 
     /**

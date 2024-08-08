@@ -30,37 +30,13 @@ class OrdersIntentController extends Controller
      */
     public function store(Request $request)
     {
-        // Définir les règles de validation
-        $rules = [
-            'order_intent_price' => [
-                'required',
-                'numeric',
-                'min:0',
-            ],
-            'order_intent_type' => [
-                'required',
-                'string',
-                // 'in:product,service,subscription',
-            ],
-            'user_email' => [
-                'required',
-                'email',
-                'max:255',
-            ],
-            'user_phone' => [
-                'required',
-                'string',
-                'regex:/^\+?[1-9]\d{1,14}$/',
-            ],
-            'expiration_date' => [
-                'required',
-                'date',
-                'after_or_equal:today',
-            ],
-        ];
-
-        // Définir les messages d'erreur
-        $messages = [
+        $validator = Validator::make($request->all(), [
+            'order_intent_price' => 'required|numeric|min:0',
+            'order_intent_type' => 'required|string',
+            'user_email' => 'required|email|max:255',
+            'user_phone' => 'required|string|regex:/^\+?[1-9]\d{1,14}$/',
+            'expiration_date' => 'required|date|after_or_equal:today',
+        ], [
             'order_intent_price.required' => "Le prix de l'ordre est requis.",
             'order_intent_price.numeric' => "Le prix de l'ordre doit être un nombre valide.",
             'order_intent_price.min' => "Le prix de l'ordre doit être zéro ou un montant positif.",
@@ -80,33 +56,22 @@ class OrdersIntentController extends Controller
             'expiration_date.required' => "La date d'expiration est requise.",
             'expiration_date.date' => "La date d'expiration doit être une date valide.",
             'expiration_date.after_or_equal' => "La date d'expiration doit être aujourd'hui ou dans le futur.",
-        ];
-
-        // Créer un validateur
-        $validator = Validator::make($request->all(), $rules, $messages);
-
-        // Vérifier si la validation échoue
+        ]);
 
         if ($validator->fails()) {
-            // Extraire les messages d'erreur
-            $errors = $validator->errors()->all();
-
-            // Retourner les messages d'erreur sous forme de tableau simple
             return response()->json([
-                'errors' => $errors
+                'message' => 'Erreur de validation des données.',
+                'errors' => $validator->errors()->all()
             ], 422);
         }
 
-        // Extraire les données validées
-        $validatedData = $validator->validated();
-
         // Créer une nouvelle instance de OrdersIntent avec les données validées
-        $orderIntent = OrdersIntent::create($validatedData);
+        $orderIntent = OrdersIntent::create($validator->validated());
 
         // Retourner une réponse JSON en cas de succès
         return response()->json([
             'message' => 'Réservation créée avec succès.',
-            'data' => $orderIntent
+            'result' => $orderIntent
         ], 201);
     }
 

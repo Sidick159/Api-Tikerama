@@ -13,11 +13,13 @@ use App\Http\Controllers\OrdersIntentController;
 // })->middleware('auth:sanctum');
 
 
-Route::resource('events', EventController::class);
-Route::resource('orders-intents ', OrdersIntentController::class);
+Route::middleware('custom_auth')->group(function () {
+    Route::resource('events', EventController::class);
+    Route::resource('orders-intents ', OrdersIntentController::class);
 
-Route::resource('orders', OrderController::class);
-Route::get('/tickets/{id}/download', [TicketController::class, 'download'])->name('tickets.download');
+    Route::resource('orders', OrderController::class);
+    Route::get('/tickets/{id}/download', [TicketController::class, 'download'])->name('tickets.download');
 
-Route::resource('tickets', TicketController::class);
-Route::resource('ticket-types', TicketTypeController::class);
+    Route::resource('tickets', TicketController::class);
+    Route::resource('ticket-types', TicketTypeController::class);
+});

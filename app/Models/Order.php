@@ -24,6 +24,8 @@ class Order extends Model
         'order_type',
         'order_payment',
         'order_info',
-        'order_created_on'
+        'order_created_on',
+
+        'user_id'
     ];
 }

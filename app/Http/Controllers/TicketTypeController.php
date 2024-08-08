@@ -39,7 +39,7 @@ class TicketTypeController extends Controller
         $ticketTypes = TicketType::where('ticket_type_event_id', $eventId)->get();
 
         return response()->json([
-            'data' => $ticketTypes
+            'result' => $ticketTypes
         ]);
     }
 

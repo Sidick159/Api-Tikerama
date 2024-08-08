@@ -13,10 +13,10 @@ class EventController extends Controller
      */
     public function index()
     {
-        $events = Event::where('event_date', '<=', Carbon::now())->orWhere('event_status', 'upcoming')->paginate(12);
+        $events = Event::where('event_date', '<=', Carbon::now())->orWhere('event_status', 'upcoming')->paginate(4);
 
         return response()->json([
-            'data' => $events
+            'result' => $events
         ]);
     }
 
@@ -39,9 +39,14 @@ class EventController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(Event $event)
+    public function show($eventId)
     {
-        //
+        $orders = Event::where('user_id', $userId)->paginate(4);
+
+        return response()->json([
+            'message' => 'Liste des commandes de l\'utilisateur',
+            'result' => $orders,
+        ], 200);
     }
 
     /**
