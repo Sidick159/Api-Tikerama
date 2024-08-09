@@ -40,7 +40,6 @@
     <main class="flex-grow flex items-center justify-center p-4">
         <div class="bg-white p-8 rounded-lg shadow-lg max-w-xl w-full fade-in">
             <h2 class="text-3xl font-bold mb-6 text-gray-800 text-center">Demande d'accès à l'Api</h2>
-            <br>
             <form action="/getAccessCredentials" method="POST" class="space-y-4">
                 @csrf
                 <!-- Prénom -->

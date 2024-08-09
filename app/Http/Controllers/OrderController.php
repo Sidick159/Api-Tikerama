@@ -17,14 +17,15 @@ use Illuminate\Support\Facades\Validator;
 
 class OrderController extends Controller
 {
-    private function generatePdfContent($tickets)
+    private function generatePdfContent($tickets, $order, $event, $ticketType)
     {
         $html = '<html><body>';
         $html .= '<h1>Liste des Tickets</h1>';
 
         foreach ($tickets as $ticket) {
             $html .= '<p>Ticket ID: ' . $ticket->ticket_id . '</p>';
-            $html .= '<p>Descridtion: ' . $ticket->ticket_email . '</p>';
+            $html .= '<p>Descridtion: ' . $order->order_info . '</p>';
+            // Autres spécification sur le ticket
             $html .= '<hr>'; // Séparateur entre les tickets
         }
 
@@ -99,7 +100,8 @@ class OrderController extends Controller
     public function store(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'order_number' => 'required|string|max:50|unique:orders,order_number',
+            'order_intent_id' => 'required|integer|max:50',
+            'order_number' => 'required|integer|max:50',
             'order_event_id' => 'required|integer',
             'order_payment' => 'required|string|max:100',
             'order_info' => 'nullable|string',
@@ -179,7 +181,7 @@ class OrderController extends Controller
             ]);
         }
         // return array_column($tickets, 'ticket_id');
-        $url = $this->generateTickets(array_column($tickets, 'ticket_id'));
+        $url = $this->generateTickets(array_column($tickets, 'ticket_id'), $order, $event, $ticketType);
         // Retourne une réponse JSON en cas de succès
         return response()->json([
             'message' => 'Réservation confirmé avec succès.',
